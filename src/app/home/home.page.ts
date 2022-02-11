@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { finalize, take } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 import { IUsuario } from '../model/usuario';
 import { DataService } from '../services/data.service';
 import { StorageService } from '../services/storage.service';
@@ -13,14 +14,16 @@ import { StorageService } from '../services/storage.service';
 export class HomePage implements OnInit, OnDestroy {
 
   public usuario: IUsuario;
-  public usuarioTem: IUsuario;
+  public usuarioTemporariov1: IUsuario;
   public skeleton = true;
-  public sucessoAtualizacao;
+  public sucessoNaAtatualizacao: string;
+  public debug: { updateApp: boolean; path: string };
+  public environmentbaseUrl = environment.baseUrl;
   private subscriptions: Subscription[] = [];
   constructor(private dataService: DataService, private storageService: StorageService) { }
 
   ngOnInit(): void {
-    this.sucessoAtualizacao = this.storageService.primeiroAcessoAposAtualizacao();
+    this.sucessoNaAtatualizacao = this.storageService.primeiroAcessoAposAtualizacao();
     this.listarUsuario();
     this.obterUsuarioLocalStorage();
   }
@@ -29,38 +32,41 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   async listarUsuario() {
-
-    this.storageService.validarAtualizarAppBehavior.pipe()
+    const subValidarAtualizacao = this.storageService.validarAtualizarAppBehavior
       .subscribe((res) => {
-        const sub = this.dataService.listar(res.path).pipe(finalize(() => {
-          this.skeleton = false;
-        })).subscribe(async usuario => {
-          if (res.updateApp) {
-            this.usuario = usuario;
-            this.limparUsuarioLocal();
-          } else if (!this.sucessoAtualizacao) {
-            this.salvarUsuarioLocalStorage(usuario);
-          }
-        });
+        this.debug = res;
+        const sub = this.dataService.listar(res.path).pipe(
+          finalize(() => {
+            this.skeleton = false;
+          })).subscribe(usuario => {
+
+            if (res.updateApp) {
+              this.usuario = usuario;
+              this.limparUsuarioLocal();
+            } else if (!this.sucessoNaAtatualizacao) {
+              this.salvarUsuarioLocalStorage(usuario);
+            }
+
+          });
         this.subscriptions.push(sub);
       });
-  }
-
-  private obterUsuarioLocalStorage() {
-    const usuarioStorage = localStorage.getItem('USUARIO');
-    this.usuarioTem = JSON.parse(usuarioStorage) as any;
-  }
-  private salvarUsuarioLocalStorage(res) {
-    localStorage.setItem('USUARIO', JSON.stringify(res));
-    this.obterUsuarioLocalStorage();
+    this.subscriptions.push(subValidarAtualizacao);
   }
   private limparUsuarioLocal() {
     const timeOut = setTimeout(() => {
       localStorage.removeItem('USUARIO');
       clearTimeout(timeOut);
       console.warn('Limpando usuario local deixando somente novo.');
-      this.usuarioTem = null;
+      this.usuarioTemporariov1 = null;
     }, 3000);
+  }
+  private salvarUsuarioLocalStorage(res) {
+    localStorage.setItem('USUARIO', JSON.stringify(res));
+    this.obterUsuarioLocalStorage();
+  }
+  private obterUsuarioLocalStorage() {
+    const usuarioStorage = localStorage.getItem('USUARIO');
+    this.usuarioTemporariov1 = JSON.parse(usuarioStorage) as any;
   }
 
 

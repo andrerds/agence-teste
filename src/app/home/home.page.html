@@ -1,8 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Teste
-    </ion-title>
+    <ion-title> Teste </ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -12,15 +10,19 @@
       <ion-title size="large">Teste</ion-title>
     </ion-toolbar>
   </ion-header>
-
+  <div class="debug">
+    <pre>
+      API: {{ environmentbaseUrl + debug?.path }};
+    </pre>
+  </div>
   <div id="container">
-   <ng-container *ngIf="usuarioTem">
-    <app-usuario [skeleton]="skeleton" [usuarioData]="usuarioTem">
-      <span> v1</span>
+    <ng-container *ngIf="usuarioTemporariov1">
+      <app-usuario [skeleton]="skeleton" [usuarioData]="usuarioTemporariov1">
+        <span> v1</span>
+      </app-usuario>
+    </ng-container>
+    <app-usuario [skeleton]="skeleton" [usuarioData]="usuario">
+      <span>v2</span>
     </app-usuario>
-   </ng-container>
-   <app-usuario [skeleton]="skeleton" [usuarioData]="usuario">
-     <span>v2</span>
-   </app-usuario>
   </div>
 </ion-content>
