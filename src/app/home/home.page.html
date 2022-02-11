@@ -14,37 +14,13 @@
   </ion-header>
 
   <div id="container">
-
-    <ion-list>
-
-
-     <ion-item  *ngIf="usuarioTem && !skeleton">
-      <span>  v1</span>
-      <ion-label> {{ usuarioTem?.nome}}
-        <p>{{ usuarioTem?.documento}}</p>
-        <p>{{ usuarioTem?.id}}</p>
-      </ion-label>
-    </ion-item>
-
-      <ion-item  *ngIf="usuario && !skeleton">
-     <span>  v2</span>
-
-        <ion-label> {{ usuario?.nome  }}
-          <p>{{usuario?.documento  }}</p>
-          <p>{{usuario?.id  }}</p>
-        </ion-label>
-      </ion-item>
-    </ion-list>
-
-    <ion-list *ngIf="skeleton  ">
-      <ion-item   >
-        <ion-label> <ion-skeleton-text animated style="width: 80%"></ion-skeleton-text>
-          <p><ion-skeleton-text animated style="width: 60%"></ion-skeleton-text></p>
-          <p><ion-skeleton-text animated style="width: 40%"></ion-skeleton-text></p>
-        </ion-label>
-      </ion-item>
-    </ion-list>
-
-
+   <ng-container *ngIf="usuarioTem">
+    <app-usuario [skeleton]="skeleton" [usuarioData]="usuarioTem">
+      <span> v1</span>
+    </app-usuario>
+   </ng-container>
+   <app-usuario [skeleton]="skeleton" [usuarioData]="usuario">
+     <span>v2</span>
+   </app-usuario>
   </div>
 </ion-content>
