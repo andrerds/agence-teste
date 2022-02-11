@@ -16,10 +16,10 @@ export class VersaoService {
   constructor(private http: HttpClient, private appVersion: AppVersion, private platform: Platform) { }
 
   async verificarAtualizacacao() {
-    const versoes = await this.versao().toPromise();
-    this.setarDataLocal(null, null);
-    let versao = null;
+    const versoesApi = await this.versao().toPromise();
     const versaoAtualEnv = environment.appVersion; // Env ou pegando pelo plugin AppVersion
+    let versao = null;
+    this.setarDataLocal(null, null);
     if (this.platform.is('android') || this.platform.is('ios')) {
       const versaoAtualPlugin = await this.versaoAppLocal();
       versao = versaoAtualPlugin.appVersion;
@@ -27,17 +27,16 @@ export class VersaoService {
       versao = versaoAtualEnv;
     }
 
-    if (versao < versoes.nova && versoes.minima < versao) {
+    if (versoesApi.nova >= versao) {
       this.setarDataLocal('true', 'v2');
       return console.log('Realizar update');
     }
 
-    if (versao < versoes.minima) {
-      this.setarDataLocal('true', 'v2');
+    if (versao < versoesApi.minima) {
       return console.log('Update com urgenge versao muita antiga');
     }
 
-    if (versao === versoes.nova) {
+    if (versao === versoesApi.nova) {
       return console.log('App atualizado');
     }
 

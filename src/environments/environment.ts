@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  appVersion: '1.0',
+  appVersion: '1.5',
   baseUrl: 'https://62059009161670001741bc48.mockapi.io/api/'
 };
 
