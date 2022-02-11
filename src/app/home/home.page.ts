@@ -28,12 +28,14 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   async listarUsuario() {
-    const path = this.storageService.validarAtualizarApp;
+    const path = this.pathUpdateApp().path;
+    const updateApp = this.pathUpdateApp().updateApp;
+
     const sub = this.dataService.listar(path).pipe(finalize(() => {
       this.skeleton = false;
     })).subscribe(async res => {
-      const sucessoAtualizacao = this.storageService.primeiroAcessoAposAtualizacao();
-      if (sucessoAtualizacao === 'true') {
+
+      if (updateApp) {
         this.usuario = res;
         this.sucessoAtualizacao = true;
         this.limparUsuarioLocal();
@@ -44,6 +46,7 @@ export class HomePage implements OnInit, OnDestroy {
 
     this.subscriptions.push(sub);
   }
+
   private obterUsuarioLocalStorage() {
     const usuarioStorage = localStorage.getItem('USUARIO');
     this.usuarioTem = JSON.parse(usuarioStorage) as any;
@@ -59,5 +62,12 @@ export class HomePage implements OnInit, OnDestroy {
       console.warn('Limpando usuario local deixando somente novo.');
       this.usuarioTem = null;
     }, 3000);
+  }
+
+  private pathUpdateApp() {
+    return {
+      path: this.storageService.validarAtualizarApp.path,
+      updateApp: this.storageService.validarAtualizarApp.updateApp
+    };
   }
 }

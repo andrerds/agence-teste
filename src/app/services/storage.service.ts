@@ -8,15 +8,19 @@ export class StorageService {
   constructor() { }
   public get validarAtualizarApp() {
     const { updateApp, path } = this.obterAtualizacaoCaminhoApiLocaStorage();
-    let autalizarPath = null;
-
     if (updateApp === 'true') {
       this.setarAutalizacaoSucesso('true');
-      return autalizarPath = path;
+      return {
+        updateApp,
+        path
+      };
 
     } else {
       this.setarAutalizacaoSucesso('false');
-      return autalizarPath = 'v1';
+      return {
+        updateApp,
+        path: 'v1'
+      };
     }
 
   }

@@ -6,29 +6,38 @@ import { environment } from 'src/environments/environment';
 import { IVersaoApp } from '../model/versao.app';
 
 import { AppVersion } from '@awesome-cordova-plugins/app-version/ngx';
+import { Platform } from '@ionic/angular';
 
 @Injectable({
   providedIn: 'root'
 })
 export class VersaoService {
 
-  constructor(private http: HttpClient, private appVersion: AppVersion) { }
+  constructor(private http: HttpClient, private appVersion: AppVersion, private platform: Platform) { }
 
   async verificarAtualizacacao() {
-    const versaoAtual = await this.versaoAppLocal(); // Env ou pegando pelo plugin AppVersion
     const versoes = await this.versao().toPromise();
     this.setarDataLocal(null, null);
-    if (versaoAtual.appVersion < versoes.nova && versoes.minima < versaoAtual.appVersion) {
+    let versao = null;
+    const versaoAtualEnv = environment.appVersion; // Env ou pegando pelo plugin AppVersion
+    if (this.platform.is('android') || this.platform.is('ios')) {
+      const versaoAtualPlugin = await this.versaoAppLocal();
+      versao = versaoAtualPlugin.appVersion;
+    } else {
+      versao = versaoAtualEnv;
+    }
+
+    if (versao < versoes.nova && versoes.minima < versao) {
       this.setarDataLocal('true', 'v2');
       return console.log('Realizar update');
     }
 
-    if (versaoAtual.appVersion < versoes.minima) {
+    if (versao < versoes.minima) {
       this.setarDataLocal('true', 'v2');
       return console.log('Update com urgenge versao muita antiga');
     }
 
-    if (versaoAtual.appVersion === versoes.nova) {
+    if (versao === versoes.nova) {
       return console.log('App atualizado');
     }
 
