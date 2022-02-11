@@ -1,27 +1,28 @@
+/* eslint-disable @typescript-eslint/member-ordering */
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StorageService {
 
+  private validarAtualizarApp$: BehaviorSubject<{ updateApp: boolean; path: string }> =
+    new BehaviorSubject({ updateApp: false, path: 'v1' });
+  public validarAtualizarAppBehavior = this.validarAtualizarApp$.asObservable();
   constructor() { }
-  public get validarAtualizarApp() {
-    const { updateApp, path } = this.obterAtualizacaoCaminhoApiLocaStorage();
-    if (!!updateApp) {
+
+  public async validarAtualizarApp() {
+    const caminhoApiLocaStorage = this.obterAtualizacaoCaminhoApiLocaStorage();
+    if (caminhoApiLocaStorage.updateApp === 'true') {
       this.setarAutalizacaoSucesso('true');
-      return {
-        updateApp,
-        path
-      };
+      return this.validarAtualizarApp$.next({ updateApp: true, path: caminhoApiLocaStorage?.path });
 
     } else {
-      this.setarAutalizacaoSucesso('false');
-      return {
-        updateApp,
-        path: 'v1'
-      };
+      return this.validarAtualizarApp$.next({ updateApp: false, path: 'v1' });
+
     }
+
 
   }
 

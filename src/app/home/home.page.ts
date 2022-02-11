@@ -15,11 +15,12 @@ export class HomePage implements OnInit, OnDestroy {
   public usuario: IUsuario;
   public usuarioTem: IUsuario;
   public skeleton = true;
-  public sucessoAtualizacao = false;
+  public sucessoAtualizacao;
   private subscriptions: Subscription[] = [];
   constructor(private dataService: DataService, private storageService: StorageService) { }
 
   ngOnInit(): void {
+    this.sucessoAtualizacao = this.storageService.primeiroAcessoAposAtualizacao();
     this.listarUsuario();
     this.obterUsuarioLocalStorage();
   }
@@ -28,23 +29,21 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   async listarUsuario() {
-    const path = this.pathUpdateApp().path;
-    const updateApp = this.pathUpdateApp().updateApp;
 
-    const sub = this.dataService.listar(path).pipe(finalize(() => {
-      this.skeleton = false;
-    })).subscribe(async res => {
-
-      if (updateApp) {
-        this.usuario = res;
-        this.sucessoAtualizacao = true;
-        this.limparUsuarioLocal();
-      } else {
-        this.salvarUsuarioLocalStorage(res);
-      }
-    });
-
-    this.subscriptions.push(sub);
+    this.storageService.validarAtualizarAppBehavior.pipe()
+      .subscribe((res) => {
+        const sub = this.dataService.listar(res.path).pipe(finalize(() => {
+          this.skeleton = false;
+        })).subscribe(async usuario => {
+          if (res.updateApp) {
+            this.usuario = usuario;
+            this.limparUsuarioLocal();
+          } else if (!this.sucessoAtualizacao) {
+            this.salvarUsuarioLocalStorage(usuario);
+          }
+        });
+        this.subscriptions.push(sub);
+      });
   }
 
   private obterUsuarioLocalStorage() {
@@ -64,10 +63,5 @@ export class HomePage implements OnInit, OnDestroy {
     }, 3000);
   }
 
-  private pathUpdateApp() {
-    return {
-      path: this.storageService.validarAtualizarApp.path,
-      updateApp: this.storageService.validarAtualizarApp.updateApp
-    };
-  }
+
 }
